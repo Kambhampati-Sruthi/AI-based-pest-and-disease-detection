@@ -12,8 +12,8 @@ st.title("PlantVillage Disease Classifier (MobileNetV2)")
 
 @st.cache_resource
 def load_model(model_dir):
-    model = tf.keras.models.load_model("C:/Users/kambh/.cache/kagglehub/models/kallakiran/leaf_species_disease_classifier/keras/default/1/best.keras")
-    labels = json.load(open("C:/Users/kambh/.cache/kagglehub/models\kallakiran/leaf_species_disease_classifier/keras/default/1/labels.json"))
+    model = tf.keras.models.load_model("best.keras")
+    labels = json.load(open("labels.json"))
     class_names = labels["class_names"]
     return model, class_names
 
@@ -49,3 +49,4 @@ if st.session_state.get("model_loaded", False):
             st.subheader(f"Prediction: **{st.session_state['class_names'][idx]}**")
             st.write(f"Confidence: {prob:.2%}")
             st.bar_chart(preds)
+
