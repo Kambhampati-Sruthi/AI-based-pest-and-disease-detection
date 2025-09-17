@@ -1,0 +1,33 @@
+{
+  "class_names": [
+    "Apple_Black Rot",
+    "Apple_Cedar Rust",
+    "Apple_Healthy",
+    "Apple_Scab",
+    "Bell Pepper_Healthy",
+    "Bell Pepper_Healthy _Bacterial Spot",
+    "Cherry_Powdert Mildew",
+    "Cherry_Powdert Mildew_Healthy",
+    "Corn Maize_Cercospora Leaf Spot",
+    "Corn Maize_Healthy_Common Rust",
+    "Corn Maize_Healthy_Northern Blight",
+    "Grape_Black Rot",
+    "Grape_Healthy",
+    "Grape_Leaf Blight",
+    "Grape_esca_Black Mealel",
+    "Peach_Bacterial Spot",
+    "Peach_Healthy",
+    "Potato_Early Blight",
+    "Potato_Healthy",
+    "Potato_Late Blight",
+    "Strawberry",
+    "Strawberry_Healthy",
+    "Strawberry_Leaf Scorch",
+    "Tomato_Bacterial Spot",
+    "Tomato_Early Blight",
+    "Tomato_Healthy",
+    "Tomato_Late Blight",
+    "Tomato_Septorial Leaf Spot",
+    "Tomato_Yellow Leaf Curl Virus"
+  ]
+}
