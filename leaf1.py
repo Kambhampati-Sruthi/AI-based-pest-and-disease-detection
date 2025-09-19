@@ -236,23 +236,25 @@ if uploaded_file:
         })
 
         # 📈 Graph of predicted class confidence
-        st.subheader("📈 Predicted Class Confidence")
-        import matplotlib.pyplot as plt
+        with st.spinner("Predicting..."):
+        preds = model.predict(x)[0]
+        idx = int(np.argmax(preds))
+        prob = float(preds[idx])
+        predicted_class = st.session_state['class_names'][idx]
 
-        fig, ax = plt.subplots()
-        ax.bar(label, confidence, color="green")
-        ax.set_ylim(0, 1)
-        ax.set_ylabel("Confidence")
-        ax.set_title(f"{label} Confidence Score")
-        st.pyplot(fig)
+        st.subheader(f"Prediction: **{predicted_class}**")
+        st.write(f"Confidence: {prob:.2%}")
+
 
     except Exception as e:
         st.error("❌ Prediction failed. Please check your model and input image format.")
         st.write(f"Error details: {e}")
+        
 
 # 🕘 Show prediction history
 if st.session_state["history"]:
     st.subheader("🕘 Prediction History")
     for entry in st.session_state["history"]:
         st.write(f"- {entry['time']}: {entry['label']} ({entry['confidence']:.2%})")
+
 
