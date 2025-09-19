@@ -208,17 +208,17 @@ image = None
 if input_method == "Upload from file":
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     if uploaded_file:
-        image = Image.open(uploaded_file).resize((224, 224))
+        image = Image.open(uploaded_file).convert("RGB").resize((224, 224))
 elif input_method == "Capture from camera":
     captured_image = st.camera_input("Take a photo")
     if captured_image:
-        image = Image.open(captured_image).resize((224, 224))
+        image = Image.open(captured_image).convert("RGB").resize((224, 224))
 
 # 🧠 Prediction
 if image:
     st.image(image, caption="Input Image", use_column_width=True)
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+    img_array = np.array(image, dtype=np.float32) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 224, 224, 3)
 
     predictions = model.predict(img_array)
     predicted_index = np.argmax(predictions)
@@ -248,4 +248,3 @@ if st.session_state["history"]:
 # 🏷️ Show all class labels
 with st.expander("📋 View All Detectable Classes"):
     st.write("\n".join(class_names))
-
