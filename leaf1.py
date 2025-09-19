@@ -200,6 +200,7 @@ precautions = {
 }
 }
 
+
 # 📸 Image input
 st.subheader("📷 Upload or Capture Leaf Image")
 input_method = st.radio("Choose input method", ["Upload from file", "Capture from camera"])
@@ -220,24 +221,29 @@ if image:
     img_array = np.array(image, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 224, 224, 3)
 
-    predictions = model.predict(img_array)
-    predicted_index = np.argmax(predictions)
-    confidence = predictions[0][predicted_index]
-    label = class_names[predicted_index]
+    try:
+        predictions = model.predict(img_array)
+        predicted_index = np.argmax(predictions)
+        confidence = predictions[0][predicted_index]
+        label = class_names[predicted_index]
 
-    st.success(f"✅ Prediction: {label} ({confidence:.2%} confidence)")
+        st.success(f"✅ Prediction: {label} ({confidence:.2%} confidence)")
 
-    precaution = precautions.get(label, {}).get(language, "No precaution available.")
-    st.info(f"🛡️ Precaution: {precaution}")
-    speak_precaution(precaution, language)
-    generate_report(label, confidence, precaution)
+        precaution = precautions.get(label, {}).get(language, "No precaution available.")
+        st.info(f"🛡️ Precaution: {precaution}")
+        speak_precaution(precaution, language)
+        generate_report(label, confidence, precaution)
 
-    # Save to history
-    st.session_state["history"].append({
-        "label": label,
-        "confidence": confidence,
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
+        # Save to history
+        st.session_state["history"].append({
+            "label": label,
+            "confidence": confidence,
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        })
+
+    except Exception as e:
+        st.error("❌ Prediction failed. Please check your model and input image format.")
+        st.write(f"Error details: {e}")
 
 # 🕘 Show prediction history
 if st.session_state["history"]:
