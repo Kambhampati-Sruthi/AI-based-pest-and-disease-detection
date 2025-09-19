@@ -201,25 +201,17 @@ precautions = {
 }
 
 
-# 📸 Image input
-st.subheader("📷 Upload or Capture Leaf Image")
-input_method = st.radio("Choose input method", ["Upload from file", "Capture from camera"])
-
-image = None
-if input_method == "Upload from file":
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
-    if uploaded_file:
-        image = Image.open(uploaded_file).convert("RGB").resize((224, 224))
-elif input_method == "Capture from camera":
-    captured_image = st.camera_input("Take a photo")
-    if captured_image:
-        image = Image.open(captured_image).convert("RGB").resize((224, 224))
+# 📁 File upload
+st.subheader("📁 Upload Leaf Image")
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
 # 🧠 Prediction
-if image:
+if uploaded_file:
+    image = Image.open(uploaded_file).convert("RGB").resize((160, 160))
     st.image(image, caption="Input Image", use_column_width=True)
+
     img_array = np.array(image, dtype=np.float32) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 224, 224, 3)
+    img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 160, 160, 3)
 
     try:
         predictions = model.predict(img_array)
