@@ -6,6 +6,7 @@ import tensorflow as tf
 from gtts import gTTS
 import base64
 from datetime import datetime
+import pandas as pd
 
 # 🌿 Page setup
 st.set_page_config(page_title="PlantVillage Disease Classifier", layout="centered")
@@ -52,6 +53,7 @@ if "history" not in st.session_state:
     st.session_state["history"] = []
 
 # 📋 Precautions dictionary (add all 29 classes here)
+
 precautions = {
     "Apple_Black Rot": {
         "English": "Prune infected branches and apply fungicide.",
@@ -200,7 +202,6 @@ precautions = {
 }
 }
 
-
 # 📁 File upload
 st.subheader("📁 Upload Leaf Image")
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -214,9 +215,9 @@ if uploaded_file:
     img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 160, 160, 3)
 
     try:
-        predictions = model.predict(img_array)
+        predictions = model.predict(img_array)[0]
         predicted_index = np.argmax(predictions)
-        confidence = predictions[0][predicted_index]
+        confidence = predictions[predicted_index]
         label = class_names[predicted_index]
 
         st.success(f"✅ Prediction: {label} ({confidence:.2%} confidence)")
@@ -233,6 +234,14 @@ if uploaded_file:
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
 
+        # 📊 Show confidence scores for all classes
+        st.subheader("📊 Confidence Scores")
+        scores_df = pd.DataFrame({
+            "Class": class_names,
+            "Confidence": [f"{score:.2%}" for score in predictions]
+        }).sort_values(by="Confidence", ascending=False)
+        st.dataframe(scores_df, use_container_width=True)
+
     except Exception as e:
         st.error("❌ Prediction failed. Please check your model and input image format.")
         st.write(f"Error details: {e}")
@@ -242,7 +251,3 @@ if st.session_state["history"]:
     st.subheader("🕘 Prediction History")
     for entry in st.session_state["history"]:
         st.write(f"- {entry['time']}: {entry['label']} ({entry['confidence']:.2%})")
-
-# 🏷️ Show all class labels
-with st.expander("📋 View All Detectable Classes"):
-    st.write("\n".join(class_names))
