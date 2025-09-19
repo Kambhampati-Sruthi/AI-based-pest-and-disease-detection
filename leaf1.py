@@ -218,15 +218,17 @@ if uploaded_file:
     try:
         predictions = model.predict(img_array)[0]
         predicted_index = np.argmax(predictions)
-        confidence = predictions[predicted_index]
         label = class_names[predicted_index]
+        confidence = predictions[predicted_index]
 
-        st.success(f"✅ Prediction: {label} ({confidence:.2%} confidence)")
-
-        precaution = precautions.get(label, {}).get(language, "No precaution available.")
-        st.info(f"🛡️ Precaution: {precaution}")
-        speak_precaution(precaution, language)
-        generate_report(label, confidence, precaution)
+        # 📊 Confidence bar chart
+        st.subheader("🔍 Confidence Scores")
+        confidence_data = {
+            "Class": class_names,
+            "Confidence": [float(p) for p in predictions]
+        }
+        df_confidence = pd.DataFrame(confidence_data)
+        st.bar_chart(df_confidence.set_index("Class"))
 
         # Save to history
         st.session_state["history"].append({
@@ -234,17 +236,6 @@ if uploaded_file:
             "confidence": confidence,
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
-
-        # 📈 Graph of predicted class confidence
-        with st.spinner("Predicting..."):
-        preds = model.predict(x)[0]
-        idx = int(np.argmax(preds))
-        prob = float(preds[idx])
-        predicted_class = st.session_state['class_names'][idx]
-
-        st.subheader(f"Prediction: **{predicted_class}**")
-        st.write(f"Confidence: {prob:.2%}")
-
 
     except Exception as e:
         st.error("❌ Prediction failed. Please check your model and input image format.")
@@ -256,5 +247,6 @@ if st.session_state["history"]:
     st.subheader("🕘 Prediction History")
     for entry in st.session_state["history"]:
         st.write(f"- {entry['time']}: {entry['label']} ({entry['confidence']:.2%})")
+
 
 
