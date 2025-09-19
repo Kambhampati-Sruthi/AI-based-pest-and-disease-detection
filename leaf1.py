@@ -4,6 +4,7 @@ import streamlit as st
 from PIL import Image
 import tensorflow as tf
 from gtts import gTTS
+import matplotlib.pyplot as plt
 import base64
 from datetime import datetime
 import pandas as pd
@@ -254,3 +255,4 @@ if st.session_state["history"]:
     st.subheader("🕘 Prediction History")
     for entry in st.session_state["history"]:
         st.write(f"- {entry['time']}: {entry['label']} ({entry['confidence']:.2%})")
+
