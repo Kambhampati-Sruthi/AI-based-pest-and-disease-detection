@@ -234,13 +234,16 @@ if uploaded_file:
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
 
-        # 📊 Show confidence scores for all classes
-        st.subheader("📊 Confidence Scores")
-        scores_df = pd.DataFrame({
-            "Class": class_names,
-            "Confidence": [f"{score:.2%}" for score in predictions]
-        }).sort_values(by="Confidence", ascending=False)
-        st.dataframe(scores_df, use_container_width=True)
+        # 📈 Graph of predicted class confidence
+        st.subheader("📈 Predicted Class Confidence")
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots()
+        ax.bar(label, confidence, color="green")
+        ax.set_ylim(0, 1)
+        ax.set_ylabel("Confidence")
+        ax.set_title(f"{label} Confidence Score")
+        st.pyplot(fig)
 
     except Exception as e:
         st.error("❌ Prediction failed. Please check your model and input image format.")
