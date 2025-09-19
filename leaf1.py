@@ -209,44 +209,43 @@ uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
 # 🧠 Prediction
 if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB").resize((160, 160))
-    st.image(image, caption="Input Image", use_column_width=True)
+    image = Image.open(uploaded_file).convert("RGB")
+    st.image(image, caption="Input Image", use_container_width=True)
 
-    img_array = np.array(image, dtype=np.float32) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 160, 160, 3)
+    model = st.session_state.get("model", model)
+    class_names = st.session_state.get("class_names", class_names)
 
-    try:
-        predictions = model.predict(img_array)[0]
-        predicted_index = np.argmax(predictions)
-        label = class_names[predicted_index]
-        confidence = predictions[predicted_index]
+    img_h, img_w = model.input_shape[1], model.input_shape[2]
+    image_resized = image.resize((img_w, img_h))
+    x = np.asarray(image_resized, dtype=np.float32) / 255.0
+    x = np.expand_dims(x, 0)
+
+    with st.spinner("🔍 Predicting..."):
+        preds = model.predict(x)[0]
+        idx = int(np.argmax(preds))
+        prob = float(preds[idx])
+        label = class_names[idx]
+
+        st.subheader(f"🧠 Prediction: **{label}**")
+        st.write(f"Confidence: {prob:.2%}")
 
         # 📊 Confidence bar chart
-        st.subheader("🔍 Confidence Scores")
-        confidence_data = {
-            "Class": class_names,
-            "Confidence": [float(p) for p in predictions]
-        }
-        df_confidence = pd.DataFrame(confidence_data)
-        st.bar_chart(df_confidence.set_index("Class"))
+        st.subheader("📊 Confidence Scores")
+        st.bar_chart(preds)
 
-        # Save to history
+        # 🛡️ Precaution Advice
+        precaution = precautions.get(label, {}).get(language, "Precaution not available.")
+        st.subheader("🛡️ Precaution Advice")
+        st.write(precaution)
+        speak_precaution(precaution, language)
+
+        # 📥 Downloadable Report
+        generate_report(label, prob, precaution)
+
+        # 🕘 Save to History
         st.session_state["history"].append({
             "label": label,
-            "confidence": confidence,
+            "confidence": prob,
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
-
-    except Exception as e:
-        st.error("❌ Prediction failed. Please check your model and input image format.")
-        st.write(f"Error details: {e}")
-        
-
-# 🕘 Show prediction history
-if st.session_state["history"]:
-    st.subheader("🕘 Prediction History")
-    for entry in st.session_state["history"]:
-        st.write(f"- {entry['time']}: {entry['label']} ({entry['confidence']:.2%})")
-
-
 
