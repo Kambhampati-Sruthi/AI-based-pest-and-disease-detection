@@ -167,7 +167,7 @@ precautions = {
         "English": "Remove scorched leaves and improve irrigation.",
         "Telugu": "కాలిన ఆకులను తొలగించి నీటిపారుదల మెరుగుపరచండి.",
         "Hindi": "झुलसे हुए पत्तों को हटाएं और सिंचाई सुधारें।"
-    }
+    },
     "Tomato_Bacterial Spot": {
     "English": "Use copper-based sprays and avoid leaf wetness.",
     "Telugu": "కాపర్ ఆధారిత స్ప్రేలు ఉపయోగించి ఆకుల తడిని నివారించండి.",
@@ -248,3 +248,4 @@ if st.session_state["history"]:
 # 🏷️ Show all class labels
 with st.expander("📋 View All Detectable Classes"):
     st.write("\n".join(class_names))
+
