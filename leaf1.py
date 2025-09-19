@@ -7,13 +7,14 @@ from gtts import gTTS
 import base64
 from datetime import datetime
 
+# 🌿 Page setup
 st.set_page_config(page_title="PlantVillage Disease Classifier", layout="centered")
 st.title("🌿 PlantVillage Disease Classifier (MobileNetV2)")
 
 # 🌐 Language selection
 language = st.selectbox("Choose language for precautions", ["English", "Telugu", "Hindi"])
 
-# 🧠 Load model and labels automatically
+# 🧠 Load model and labels
 @st.cache_resource
 def load_model():
     model = tf.keras.models.load_model("best.keras")
@@ -50,7 +51,7 @@ Precaution Advice:
 if "history" not in st.session_state:
     st.session_state["history"] = []
 
-# 📋 Specific precautions for all 29 classes
+# 📋 Precautions dictionary (add all 29 classes here)
 precautions = {
     "Apple_Black Rot": {
         "English": "Prune infected branches and apply fungicide.",
@@ -148,4 +149,102 @@ precautions = {
         "Hindi": "मिट्टी की सेहत बनाए रखें और ब्लाइट की निगरानी करें।"
     },
     "Potato_Late Blight": {
-        "English": "
+        "English": "Apply fungicide promptly and avoid overhead irrigation.",
+        "Telugu": "ఫంగిసైడ్‌ను వెంటనే ఉపయోగించి పై నుండి నీటిపారుదల నివారించండి.",
+        "Hindi": "फफूंदनाशक तुरंत लगाएं और ऊपर से सिंचाई से बचें।"
+    },
+    "Strawberry": {
+        "English": "Use mulch and avoid water splash on leaves.",
+        "Telugu": "మల్చ్‌ను ఉపయోగించి ఆకులపై నీటి చిమ్ముటను నివారించండి.",
+        "Hindi": "मल्च का उपयोग करें और पत्तों पर पानी के छींटे से बचें।"
+    },
+    "Strawberry_Healthy": {
+        "English": "Maintain spacing and monitor for leaf scorch.",
+        "Telugu": "అంతరాన్ని ఉంచి ఆకుల కాలిన లక్షణాల కోసం పరిశీలించండి.",
+        "Hindi": "दूरी बनाए रखें और पत्तों के झुलसने की निगरानी करें।"
+    },
+    "Strawberry_Leaf Scorch": {
+        "English": "Remove scorched leaves and improve irrigation.",
+        "Telugu": "కాలిన ఆకులను తొలగించి నీటిపారుదల మెరుగుపరచండి.",
+        "Hindi": "झुलसे हुए पत्तों को हटाएं और सिंचाई सुधारें।"
+    }
+    "Tomato_Bacterial Spot": {
+    "English": "Use copper-based sprays and avoid leaf wetness.",
+    "Telugu": "కాపర్ ఆధారిత స్ప్రేలు ఉపయోగించి ఆకుల తడిని నివారించండి.",
+    "Hindi": "तांबा आधारित स्प्रे का उपयोग करें और पत्तों को गीला होने से बचाएं।"
+},
+"Tomato_Early Blight": {
+    "English": "Apply fungicide and remove infected foliage.",
+    "Telugu": "ఫంగిసైడ్‌ను ఉపయోగించి బాధిత ఆకులను తొలగించండి.",
+    "Hindi": "फफूंदनाशक लगाएं और संक्रमित पत्तों को हटाएं।"
+},
+"Tomato_Healthy": {
+    "English": "Maintain crop rotation and monitor for blight.",
+    "Telugu": "పంటల మార్పిడి కొనసాగించి బ్లైట్ కోసం పరిశీలించండి.",
+    "Hindi": "फसल चक्र बनाए रखें और ब्लाइट की निगरानी करें।"
+},
+"Tomato_Late Blight": {
+    "English": "Use resistant varieties and apply fungicide during cool, wet weather.",
+    "Telugu": "ప్రతిఘటించే రకాలను ఉపయోగించి చల్లని, తడి వాతావరణంలో ఫంగిసైడ్‌ను స్ప్రే చేయండి.",
+    "Hindi": "प्रतिरोधी किस्मों का उपयोग करें और ठंडे, नम मौसम में फफूंदनाशक लगाएं।"
+},
+"Tomato_Septorial Leaf Spot": {
+    "English": "Remove infected leaves and avoid overhead watering.",
+    "Telugu": "బాధిత ఆకులను తొలగించి పై నుండి నీరు పోయడం నివారించండి.",
+    "Hindi": "संक्रमित पत्तों को हटाएं और ऊपर से पानी देना बंद करें।"
+},
+"Tomato_Yellow Leaf Curl Virus": {
+    "English": "Control whiteflies and use virus-resistant varieties.",
+    "Telugu": "తెల్లతెగులు నియంత్రించి వైరస్-ప్రతిఘటించే రకాలను ఉపయోగించండి.",
+    "Hindi": "सफेद मक्खियों को नियंत्रित करें और वायरस-प्रतिरोधी किस्मों का उपयोग करें।"
+}
+}
+
+# 📸 Image input
+st.subheader("📷 Upload or Capture Leaf Image")
+input_method = st.radio("Choose input method", ["Upload from file", "Capture from camera"])
+
+image = None
+if input_method == "Upload from file":
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        image = Image.open(uploaded_file).resize((224, 224))
+elif input_method == "Capture from camera":
+    captured_image = st.camera_input("Take a photo")
+    if captured_image:
+        image = Image.open(captured_image).resize((224, 224))
+
+# 🧠 Prediction
+if image:
+    st.image(image, caption="Input Image", use_column_width=True)
+    img_array = np.array(image) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+
+    predictions = model.predict(img_array)
+    predicted_index = np.argmax(predictions)
+    confidence = predictions[0][predicted_index]
+    label = class_names[predicted_index]
+
+    st.success(f"✅ Prediction: {label} ({confidence:.2%} confidence)")
+
+    precaution = precautions.get(label, {}).get(language, "No precaution available.")
+    st.info(f"🛡️ Precaution: {precaution}")
+    speak_precaution(precaution, language)
+    generate_report(label, confidence, precaution)
+
+    # Save to history
+    st.session_state["history"].append({
+        "label": label,
+        "confidence": confidence,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
+
+# 🕘 Show prediction history
+if st.session_state["history"]:
+    st.subheader("🕘 Prediction History")
+    for entry in st.session_state["history"]:
+        st.write(f"- {entry['time']}: {entry['label']} ({entry['confidence']:.2%})")
+
+# 🏷️ Show all class labels
+with st.expander("📋 View All Detectable Classes"):
+    st.write("\n".join(class_names))
